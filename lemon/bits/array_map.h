@@ -5,6 +5,9 @@
  * Copyright (C) 2003-2013
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
+ * 
+ * Copyright (C) 2021
+ * GPAF: online project over graphs
  *
  * Permission to use, modify and distribute this software is granted
  * provided that this copyright notice appears in all copies. For
@@ -88,7 +91,7 @@ namespace lemon {
       Item it;
       for (nf->first(it); it != INVALID; nf->next(it)) {
         int id = nf->id(it);;
-        allocator.construct(&(values[id]), Value());
+          std::allocator_traits<std::allocator<Value>>::construct(allocator, &(values[id]), Value());
       }
     }
 
@@ -102,7 +105,7 @@ namespace lemon {
       Item it;
       for (nf->first(it); it != INVALID; nf->next(it)) {
         int id = nf->id(it);;
-        allocator.construct(&(values[id]), value);
+          std::allocator_traits<std::allocator<Value>>::construct(allocator, &(values[id]), value);
       }
     }
 
@@ -116,12 +119,12 @@ namespace lemon {
       }
       capacity = copy.capacity;
       if (capacity == 0) return;
-      values = allocator.allocate(capacity);
+      values = std::allocator_traits<std::allocator<Value>>::allocate(allocator, capacity);
       Notifier* nf = Parent::notifier();
       Item it;
       for (nf->first(it); it != INVALID; nf->next(it)) {
         int id = nf->id(it);;
-        allocator.construct(&(values[id]), copy.values[id]);
+          std::allocator_traits<std::allocator<Value>>::construct(allocator, &(values[id]), copy.values[id]);
       }
     }
 
@@ -213,20 +216,20 @@ namespace lemon {
         while (new_capacity <= id) {
           new_capacity <<= 1;
         }
-        Value* new_values = allocator.allocate(new_capacity);
+        Value* new_values = std::allocator_traits<std::allocator<Value>>::allocate(allocator, new_capacity);
         Item it;
         for (nf->first(it); it != INVALID; nf->next(it)) {
           int jd = nf->id(it);;
           if (id != jd) {
-            allocator.construct(&(new_values[jd]), values[jd]);
-            allocator.destroy(&(values[jd]));
+              std::allocator_traits<std::allocator<Value>>::construct(allocator, &(new_values[jd]), values[jd]);
+              std::allocator_traits<std::allocator<Value>>::destroy(allocator, &(values[jd]));
           }
         }
-        if (capacity != 0) allocator.deallocate(values, capacity);
+        if (capacity != 0) std::allocator_traits<std::allocator<Value>>::deallocate(allocator, values, capacity);
         values = new_values;
         capacity = new_capacity;
       }
-      allocator.construct(&(values[id]), Value());
+        std::allocator_traits<std::allocator<Value>>::construct(allocator, &(values[id]), Value());
     }
 
     // \brief Adds more new keys to the map.
@@ -247,7 +250,7 @@ namespace lemon {
         while (new_capacity <= max_id) {
           new_capacity <<= 1;
         }
-        Value* new_values = allocator.allocate(new_capacity);
+        Value* new_values = std::allocator_traits<std::allocator<Value>>::allocate(allocator, new_capacity);
         Item it;
         for (nf->first(it); it != INVALID; nf->next(it)) {
           int id = nf->id(it);
@@ -260,16 +263,16 @@ namespace lemon {
             }
           }
           if (found) continue;
-          allocator.construct(&(new_values[id]), values[id]);
-          allocator.destroy(&(values[id]));
+            std::allocator_traits<std::allocator<Value>>::construct(allocator, &(new_values[id]), values[id]);
+            std::allocator_traits<std::allocator<Value>>::destroy(allocator, &(values[id]));
         }
-        if (capacity != 0) allocator.deallocate(values, capacity);
+        if (capacity != 0) std::allocator_traits<std::allocator<Value>>::deallocate(allocator, values, capacity);
         values = new_values;
         capacity = new_capacity;
       }
       for (int i = 0; i < int(keys.size()); ++i) {
         int id = nf->id(keys[i]);
-        allocator.construct(&(values[id]), Value());
+          std::allocator_traits<std::allocator<Value>>::construct(allocator, &(values[id]), Value());
       }
     }
 
@@ -279,7 +282,7 @@ namespace lemon {
     // and it overrides the erase() member function of the observer base.
     virtual void erase(const Key& key) {
       int id = Parent::notifier()->id(key);
-      allocator.destroy(&(values[id]));
+        std::allocator_traits<std::allocator<Value>>::destroy(allocator, &(values[id]));
     }
 
     // \brief Erase more keys from the map.
@@ -289,7 +292,7 @@ namespace lemon {
     virtual void erase(const std::vector<Key>& keys) {
       for (int i = 0; i < int(keys.size()); ++i) {
         int id = Parent::notifier()->id(keys[i]);
-        allocator.destroy(&(values[id]));
+          std::allocator_traits<std::allocator<Value>>::destroy(allocator,&(values[id]) );
       }
     }
 
@@ -302,8 +305,8 @@ namespace lemon {
       allocate_memory();
       Item it;
       for (nf->first(it); it != INVALID; nf->next(it)) {
-        int id = nf->id(it);;
-        allocator.construct(&(values[id]), Value());
+        int id = nf->id(it);
+        std::allocator_traits<std::allocator<Value>>::construct(allocator, &(values[id]), Value());
       }
     }
 
@@ -317,9 +320,9 @@ namespace lemon {
         Item it;
         for (nf->first(it); it != INVALID; nf->next(it)) {
           int id = nf->id(it);
-          allocator.destroy(&(values[id]));
+            std::allocator_traits<std::allocator<Value>>::destroy(allocator, &(values[id]));
         }
-        allocator.deallocate(values, capacity);
+        std::allocator_traits<std::allocator<Value>>::deallocate(allocator,  values, capacity);
         capacity = 0;
       }
     }
@@ -337,7 +340,7 @@ namespace lemon {
       while (capacity <= max_id) {
         capacity <<= 1;
       }
-      values = allocator.allocate(capacity);
+      values = std::allocator_traits<std::allocator<Value>>::allocate(allocator, capacity);
     }
 
     int capacity;
